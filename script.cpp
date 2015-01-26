@@ -533,7 +533,8 @@ void Script::RunSVM(const string& featureSrcPath, const string& expSrcPath){
       #pragma omp parallel for
       for (int i=0; i<exp_num; ++i){
 
-        cv::FileStorage fs(featureSrcPath + "/bu_hos.xml",  cv::FileStorage::READ);
+        cv::FileStorage fs_hog(featureSrcPath + "/bu_hog.xml",  cv::FileStorage::READ);
+        cv::FileStorage fs_hos(featureSrcPath + "/bu_hos.xml",  cv::FileStorage::READ);
 
         string exp_file = exps.at(i);
         string name;
@@ -551,7 +552,7 @@ void Script::RunSVM(const string& featureSrcPath, const string& expSrcPath){
         SVMAdapter svm(svm_params);
 
         {
-          cv::Mat train_data(54*12, 3528, CV_64FC1);
+          cv::Mat train_data(54*12, 3528*2, CV_64FC1);
           cv::Mat train_label(54*12, 1, CV_32SC1);
           for (size_t k=0; k<54*12; k++){
             name = samples.at(k);
@@ -568,15 +569,19 @@ void Script::RunSVM(const string& featureSrcPath, const string& expSrcPath){
             }else  if (name.find("SU") != string::npos){
               train_label.at<int>(k,0) = 6;
             }
-            cv::Mat mat;
-            fs[name]>>mat;
-            mat.copyTo(train_data.row(k));
+            cv::Mat hog, hos;
+            fs_hog[name]>>hog;
+            fs_hos[name]>>hos;
+            cv::Mat hog_hos(hog.rows, hog.cols*2, hog.type());
+            hog.copyTo(hog_hos(cv::Range::all(), cv::Range(0, hog.cols)));
+            hos.copyTo(hog_hos(cv::Range::all(), cv::Range(hog.cols, 2*hog.cols)));
+            hog_hos.copyTo(train_data.row(k));
           }
           svm.Train(train_data, train_label);
         }
 
         {
-          cv::Mat test_data(6*12, 3528, CV_64FC1);
+          cv::Mat test_data(6*12, 3528*2, CV_64FC1);
           cv::Mat test_label(6*12, 1, CV_32SC1);
           for (size_t k=54*12; k<60*12; k++){
             name = samples.at(k);
@@ -593,9 +598,13 @@ void Script::RunSVM(const string& featureSrcPath, const string& expSrcPath){
             }else  if (name.find("SU") != string::npos){
               test_label.at<int>(k-54*12,0) = 6;
             }
-            cv::Mat mat;
-            fs[name]>>mat;
-            mat.copyTo(test_data.row(k-54*12));
+            cv::Mat hog, hos;
+            fs_hog[name]>>hog;
+            fs_hos[name]>>hos;
+            cv::Mat hog_hos(hog.rows, hog.cols*2, hog.type());
+            hog.copyTo(hog_hos(cv::Range::all(), cv::Range(0, hog.cols)));
+            hos.copyTo(hog_hos(cv::Range::all(), cv::Range(hog.cols, 2*hog.cols)));
+            hog_hos.copyTo(test_data.row(k-54*12));
           }
           cv::Mat label, prob;
           svm.Predict(test_data,label,prob);
@@ -608,7 +617,8 @@ void Script::RunSVM(const string& featureSrcPath, const string& expSrcPath){
           // cout<<"Rate : "<<1- (double)error_num/(double)test_label.rows<<endl;
           rates.at(i) = 1- (double)error_num/(double)test_label.rows;
         }
-        fs.release();
+        fs_hog.release();
+        fs_hos.release();
       }
 
 
@@ -631,7 +641,7 @@ void Script::RunAllSVM(const string& featureSrcPath, const string& expSrcPath){
 
   vector<string> exps = sys::dir(expSrcPath);
 
-  int exp_num  = 10;
+  int exp_num  = 100;
 
   double hog_rate = 0;
   double hos_rate = 0;

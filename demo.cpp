@@ -34,7 +34,7 @@ int main(){
   // Script::FeatureExtration("/home/ding/BU_Work/BU_step4_texpro", "/home/ding/BU_Work/BU_step5_feature");
   //Script::GenerateExpeimentConfigration("/home/ding/BU_Work/BU_step4_texpro","/home/ding/BU_Work/BU_step5_feature", "/home/ding/BU_Work/BU_step6_Experiment");
   // Script::GenerateLibSVMFile("/home/ding/BU_Work/BU_step5_feature","/home/ding/BU_Work/BU_step6_Experiment", "/home/ding/BU_Work/BU_step7_libsvm");
-  //Script::RunSVM("/home/ding/BU_Work/BU_step5_feature","/home/ding/BU_Work/BU_step6_Experiment");
-  Script::RunAllSVM("/home/ding/BU_Work/BU_step5_feature","/home/ding/BU_Work/BU_step6_Experiment");
+  Script::RunSVM("/home/ding/BU_Work/BU_step5_feature","/home/ding/BU_Work/BU_step6_Experiment");
+  //Script::RunAllSVM("/home/ding/BU_Work/BU_step5_feature","/home/ding/BU_Work/BU_step6_Experiment");
   return 0;
 }
