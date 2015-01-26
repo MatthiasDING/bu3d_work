@@ -39,6 +39,14 @@ public:
     return feature_level_;
   }
 
+  cv::Mat hog() const{
+    return hog_;
+  }
+
+  cv::Mat hos() const{
+    return hos_;
+  }
+
   double score_rate(){
     return overall(score_level_);
   }
@@ -47,13 +55,21 @@ public:
     return overall(feature_level_);
   }
 
+  double hog_rate(){
+    return overall(hog_);
+  }
+
+  double hos_rate(){
+    return overall(hos_);
+  }
+
   void save(const std::string& filename);
 private:
   cv::Mat compute_rate(cv::Mat& prob, cv::Mat& label);
   double overall(cv::Mat& rate);
   liris::SVMParameter svm_params_hog_, svm_params_hos_, svm_params_hog_hos_;
   liris::SVMAdapter *svm_hog_, *svm_hos_, *svm_hog_hos_;
-  cv::Mat score_level_, feature_level_;
+  cv::Mat score_level_, feature_level_, hog_, hos_;
 };
 
 #endif

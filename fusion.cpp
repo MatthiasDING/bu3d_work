@@ -35,6 +35,8 @@ void Fusion::Predict(cv::Mat&  hog, cv::Mat& hos, cv::Mat& label){
 
   cv::Mat score_fusion_prob = hog_prob + hos_prob;
 
+  hog_ = compute_rate(hog_prob, label);
+  hos_ = compute_rate(hos_prob, label);
   score_level_ = compute_rate(score_fusion_prob, label);
   feature_level_ = compute_rate(hog_hos_prob, label);
 }
@@ -66,6 +68,8 @@ double Fusion::overall(cv::Mat& rate){
 
 void Fusion::save(const std::string& filename){
   cv::FileStorage fs(filename, cv::FileStorage::WRITE);
+  fs<<"hog"<<hog_;
+  fs<<"hos"<<hos_;
   fs<<"score"<<score_level_;
   fs<<"feature"<<feature_level_;
   fs.release();

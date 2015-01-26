@@ -633,8 +633,12 @@ void Script::RunAllSVM(const string& featureSrcPath, const string& expSrcPath){
 
   int exp_num  = 10;
 
+  double hog_rate = 0;
+  double hos_rate = 0;
+  double score_fusion_rate = 0;
+  double feature_fusion_rate = 0;
   //#pragma omp parallel for
-  for (int i=30; i<exp_num+30; ++i){
+  for (int i=0; i<exp_num; ++i){
 
   cv::FileStorage fs_hog(featureSrcPath + "/bu_hog.xml",  cv::FileStorage::READ);
   cv::FileStorage fs_hos(featureSrcPath + "/bu_hos.xml",  cv::FileStorage::READ);
@@ -727,9 +731,19 @@ void Script::RunAllSVM(const string& featureSrcPath, const string& expSrcPath){
     }
     fusion.Predict(test_hog, test_hos,  test_label);
   }
-  cout<<fusion.score_level()<<fusion.feature_level()<<endl;
-  cout<<fusion.score_rate()<<"    "<<fusion.feature_rate()<<std::endl;
+  //cout<<fusion.score_level()<<fusion.feature_level()<<endl;
+  hog_rate += fusion.hog_rate();
+  hos_rate += fusion.hos_rate();
+  score_fusion_rate += fusion.score_rate();
+  feature_fusion_rate += fusion.feature_rate();
+  cout<<"Iter "<<i<<"    "<<fusion.hog_rate()<<"    "<<fusion.hos_rate()<<"     "<<fusion.score_rate()<<"    "<<fusion.feature_rate()<<std::endl;
   fs_hog.release();
   fs_hos.release();
   }
+  hog_rate /= exp_num;
+  hos_rate /= exp_num;
+  score_fusion_rate /= exp_num;
+  feature_fusion_rate /= exp_num;
+
+  cout<<"Overall "<<hog_rate<<"   "<<hos_rate<<"   "<<score_fusion_rate<<"    "<<feature_fusion_rate<<endl;
 }
